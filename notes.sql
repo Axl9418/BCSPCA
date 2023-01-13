@@ -22,3 +22,15 @@ if IS VALID {
     DELETE FROM `new_donors_original`
     WHERE `CONS_ID` = X;
 }
+
+UPDATE `new_donors_original`
+SET `HOME_STATEPROV` = 'BC'
+WHERE `HOME_STATEPROV` IN ('', 'British Columbia');
+
+SELECT  `CONS_ID`,`HOME_STATEPROV`,`HOME_COUNTRY`,`HOME_ZIP`
+FROM `new_donors_original`
+WHERE `HOME_STATEPROV` NOT IN ('AB', 'BC' , 'MB', 'NB', 'NL', 'NT', 'NS', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT');
+
+UPDATE `new_donors_original`
+SET `HOME_STATEPROV` = X
+WHERE `CONS_ID` = X;

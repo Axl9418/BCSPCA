@@ -69,11 +69,10 @@
 
         return (bool) preg_match($sRegExp, strtoupper($postalCode));
     }
-/*
-$badPostCode = '48103';
+
+/*$badPostCode = '48103';
 $result = postalCode($badPostCode);
 echo 'Test ' . $badPostCode .' : <br />';
-var_export($result);
-*/
+var_export($result);*/
 
 ?>
