@@ -114,11 +114,44 @@ function updateProvinces($province, $id) {
 
 //------------------------------------------------------------------------------------------------------------------
 //Delete Champions
-
 function deleteChampions() {
   $deleteChampions = "DELETE FROM `new_donors_original` WHERE `CAMPAIGN_NAME` like '%champions%'";
 
   return getdb()->query($deleteChampions);
+}
+
+//------------------------------------------------------------------------------------------------------------------
+//Delete Sustaining records
+function deleteSustaining() {
+  $deleteSustaining = "DELETE FROM `new_donors_original` WHERE `PAYMENT_PLAN` = 'Sustaining'";
+
+  return getdb()->query($deleteSustaining);
+}
+
+//------------------------------------------------------------------------------------------------------------------
+//Delete No First time donors
+function noNewDonors() {
+  $noNewDonors = "DELETE FROM `new_donors_original` WHERE `FIRST_TIME_DONOR` = 'No'";
+
+  return getdb()->query($noNewDonors);
+}
+
+//Format Date
+function formatDate(){
+  $checkDates = getdb()->query("SELECT `DONATION_DATE` FROM `new_donors_original` WHERE DATE_FORMAT(`DONATION_DATE`, '%Y/%m/%d')");
+    if ($checkDates->num_rows > 0) {
+      $formatDate = "UPDATE `new_donors_original` SET `DONATION_DATE` = DATE_FORMAT(`DONATION_DATE`, '%m/%d/%Y')";
+      return getdb()->query($formatDate);
+    }
+ 
+}
+
+//------------------------------------------------------------------------------------------------------------------
+//Delete blank phone records
+function noPhone() {
+  $noPhone = "DELETE FROM `new_donors_original` WHERE `CONS_PHONE` = ''";
+
+  return getdb()->query($noPhone);
 }
 
  ?>

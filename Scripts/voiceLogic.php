@@ -52,4 +52,17 @@ if ($result->num_rows > 0) {
 //Delete records that contains Champions
 deleteChampions();
 
+//Delete sustaining records
+deleteSustaining();
+
+//Delete no first time donors
+noNewDonors();
+
+//Format DONATION_DATE date
+formatDate();
+
+//Delete blank phone records
+noPhone();
+
+
 ?>
