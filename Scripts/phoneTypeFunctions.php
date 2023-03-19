@@ -98,7 +98,7 @@ function setinactive() {
 
             $setinactive = "UPDATE `phone type`
             SET `$inactive` = 'Yes', `$primary` = 'No'
-            WHERE `$type` IN ('Number-Incomplete #', 'Number-Invalid', 'Number-Not In Service', 'Number-Wrong Number')";
+            WHERE `$type` IN ('Number-Incomplete', 'Number-Invalid', 'Number-Not In Service', 'Number-Wrong Number')";
 
             getdb()->query($setinactive);
             
@@ -167,45 +167,161 @@ function emailBusinessComments() {
     }
 }
 
+//Fixing wrong primary phone numbers
+function wrongPrimaryPhone() {
+    for($i=0; $i<10; $i++){
+        $primary = "Primary";
+            $inactive = "Inactive";
+
+            if($i<>0){
+                $primary = "Primary_$i";
+                $inactive = "Inactive_$i";
+            }
+
+        $wrongPrimaryPhone= "UPDATE `phone type` SET `$primary` = 'No' WHERE `$primary` = 'Yes' AND `$inactive` = 'Yes'";
+        getdb()->query($wrongPrimaryPhone);
+    }
+}
+
+//Mark as a Primary records which only have 1 phone number an is valid
+function firstPrimaryPhone() {
+
+        $firstPrimaryPhone= "UPDATE `phone type` SET `Primary` = 'Yes' WHERE `Primary` = 'No' AND `Inactive` = 'No' AND `Primary_1` = '' AND `Type` Not In ('Number-Incomplete', 'Number-Invalid', 'Number-Not In Service', 'Number-Wrong Number')";
+        getdb()->query($firstPrimaryPhone);
+}
+
 //Setting at least one phone as a primary for ID
-
 function setPrimaryPhone() {
+    //Dinamic query 
+    $fullQuery = '';
+    for($i=1; $i<10; $i++) {
 
-    $noPrimary = "SELECT `ID` FROM `phone type` WHERE `PRIMARY` = 'No' AND `Inactive` = 'No'
-    AND `PRIMARY_1` = 'No' AND `Inactive_1` = 'No'
-    AND `PRIMARY_2` = 'No' AND `Inactive_2` = 'No'
-    AND `PRIMARY_3` = 'No' AND `Inactive_3` = 'No'
-    AND `PRIMARY_4` = 'No' AND `Inactive_4` = 'No'
-    AND `PRIMARY_5` = 'No' AND `Inactive_5` = 'No'
-    AND `PRIMARY_6` = 'No' AND `Inactive_6` = 'No'
-    AND `PRIMARY_7` = 'No' AND `Inactive_7` = 'No'
-    AND `PRIMARY_8` = 'No' AND `Inactive_8` = 'No'
-    AND `PRIMARY_9` = 'No' AND `Inactive_9` = 'No'";
+        $long = strlen($fullQuery);
+        $cut = $long-21;
+        $extra = substr($fullQuery, 0, $cut);
 
-    
-    
-    /*
-    $x = 0;
+        $query = "SELECT `ID` FROM `phone type` WHERE `Primary` = 'No' AND `Inactive` = 'No' AND `Type` Not In ('Number-Incomplete', 'Number-Invalid', 'Number-Not In Service', 'Number-Wrong Number')";
+        $j = $i+1;
+            if($i == 1){
+                $complement = " AND `Primary_$i` = 'No' AND `Inactive_$i` = 'No' AND `Type_$i` Not In ('Number-Incomplete', 'Number-Invalid', 'Number-Not In Service', 'Number-Wrong Number') AND `Primary_$j` = ''";
+                $fullQuery = $query.$complement;
+            }else{
+                if($i==9){
+                    $complement = " AND `Primary_$i` = 'No' AND `Inactive_$i` = 'No' AND `Type_$i` Not In ('Number-Incomplete', 'Number-Invalid', 'Number-Not In Service', 'Number-Wrong Number')";
+                }else{
+                    $complement = " AND `Primary_$i` = 'No' AND `Inactive_$i` = 'No' AND `Type_$i` Not In ('Number-Incomplete', 'Number-Invalid', 'Number-Not In Service', 'Number-Wrong Number') AND `Primary_$j` = ''";
+                }
+                
+                $fullQuery = $extra.$complement;
+            }
+        
+        //echo "<br> $fullQuery <br><br>";
+        $idToUpdate = getdb()->query($fullQuery);
 
-    do {
-        $primary = 'Primary';
-        if($x<>0){
-            
-            $primary = "Primary_$x";
+        if ($idToUpdate->num_rows > 0) {
+                    
+            while($result = mysqli_fetch_assoc($idToUpdate)){
+                //Current ID
+                $id = $result['ID'];
+                //echo "<BR>$id";
+
+                //Most recent date
+                $newDate = "SELECT `ID`, @highest_val:= GREATEST(`Last Update`, `Last Update_1`, `Last Update_2`, `Last Update_3`, `Last Update_4`, `Last Update_5`, `Last Update_6`, `Last Update_7`, `Last Update_8`, `Last Update_9`) AS last_update, CASE @highest_val WHEN `Last Update` THEN 'Primary' WHEN `Last Update_1` THEN 'Primary_1' WHEN `Last Update_2` THEN 'Primary_2' WHEN `Last Update_3` THEN 'Primary_3' WHEN `Last Update_4` THEN 'Primary_4' WHEN `Last Update_5` THEN 'Primary_5' WHEN `Last Update_6` THEN 'Primary_6' WHEN `Last Update_7` THEN 'Primary_7' WHEN `Last Update_8` THEN 'Primary_8' WHEN `Last Update_9` THEN 'Primary_9' END AS column_name FROM `phone type` where `ID`= $id";
+                $dates = getdb()->query($newDate);
+                    if ($dates->num_rows > 0) {
+                        while($row = mysqli_fetch_assoc($dates)){
+                            $date = $row['last_update'];
+                            //echo "<BR>$date";
+                            $column = $row['column_name'];
+                            //echo "<BR>$column";
+
+                            //set Primary Phone
+                            $setPrimaryPhone = "UPDATE `phone type` SET `$column` = 'Yes' WHERE `ID` = '$id'";
+                            getdb()->query($setPrimaryPhone);
+                        }
+                    }
+            }
         }
+    }
+        
+}
 
-        echo "The number is: $primary <br>";
+//Fixing wrong primary email addresses
+function wrongPrimaryEmail() {
+    for($i=0; $i<10; $i++){
+        $primary = "Is Primary?";
+            $inactive = "Is Inactive?";
 
-        $x++;
-      } while ($x <=9);
-      */
+            if($i<>0){
+                $primary = "Is Primary_$i?";
+                $inactive = "Is Inactive_$i?";
+            }
 
-    //Cuales no
-    //comparar fechas
-    //obtengo posicion
-    //updATE
+        $wrongPrimaryEmail= "UPDATE `phone type` SET `$primary` = 'No' WHERE `$primary` = 'Yes' AND `$inactive` = 'Yes'";
+        getdb()->query($wrongPrimaryEmail);
+    }
+}
 
+//Mark as a Primary records which only have 1 email address an is valid
+function firstPrimaryEmail() {
 
+    $firstPrimaryEmail= "UPDATE `phone type` SET `Is Primary?` = 'Yes' WHERE `Is Primary?` = 'No' AND `Is Inactive?` = 'No' AND `Email Type` = 'Email' AND `Is Primary?_1` = ''";
+    getdb()->query($firstPrimaryEmail);
+}
+
+function setPrimaryEmail() {
+    //Dinamic query 
+    $fullQuery = '';
+    for($i=1; $i<10; $i++) {
+
+        $long = strlen($fullQuery);
+        $cut = $long-24;
+        $extra = substr($fullQuery, 0, $cut);
+
+        $query = "SELECT `ID` FROM `phone type` WHERE `Is Primary?` = 'No' AND `Is Inactive?` = 'No' AND `Email Type` = 'Email'";
+        $j = $i+1;
+            if($i == 1){
+                $complement = " AND `Is Primary?_$i` = 'No' AND `Is Inactive?_$i` = 'No' AND `Email Type_$i` = 'Email' AND `Is Primary?_$j` = ''";
+                $fullQuery = $query.$complement;
+            }else{
+                if($i==9){
+                    $complement = " AND `Is Primary?_$i` = 'No' AND `Is Inactive?_$i` = 'No' AND `Email Type_$i` = 'Email'";
+                }else{
+                    $complement = " AND `Is Primary?_$i` = 'No' AND `Is Inactive?_$i` = 'No' AND `Email Type_$i` = 'Email' AND `Is Primary?_$j` = ''";
+                }
+                
+                $fullQuery = $extra.$complement;
+            }
+        
+        //echo "<br> $fullQuery <br><br>";
+        $idToUpdate = getdb()->query($fullQuery);
+
+        if ($idToUpdate->num_rows > 0) {
+                    
+            while($result = mysqli_fetch_assoc($idToUpdate)){
+                //Current ID
+                $id = $result['ID'];
+                //echo "<BR>$id";
+
+                //Most recent date
+                $newDate = "SELECT `ID`, @highest_val:= GREATEST(`Date Last Changed`, `Date Last Changed_1`, `Date Last Changed_2`, `Date Last Changed_3`, `Date Last Changed_4`, `Date Last Changed_5`, `Date Last Changed_6`, `Date Last Changed_7`, `Date Last Changed_8`, `Date Last Changed_9`) AS last_update, CASE @highest_val WHEN `Date Last Changed` THEN 'Is Primary?' WHEN `Date Last Changed_1` THEN 'Is Primary?_1' WHEN `Date Last Changed_2` THEN 'Is Primary?_2' WHEN `Date Last Changed_3` THEN 'Is Primary?_3' WHEN `Date Last Changed_4` THEN 'Is Primary?_4' WHEN `Date Last Changed_5` THEN 'Is Primary?_5' WHEN `Date Last Changed_6` THEN 'Is Primary?_6' WHEN `Date Last Changed_7` THEN 'Is Primary?_7' WHEN `Date Last Changed_8` THEN 'Is Primary?_8' WHEN `Date Last Changed_9` THEN 'Is Primary?_9' END AS column_name FROM `phone type` where `ID`= $id";
+                $dates = getdb()->query($newDate);
+                    if ($dates->num_rows > 0) {
+                        while($row = mysqli_fetch_assoc($dates)){
+                            $date = $row['last_update'];
+                            //echo "<BR>$date";
+                            $column = $row['column_name'];
+                            //echo "<BR>$column";
+
+                            //set Primary Email
+                            $setPrimaryEmail = "UPDATE `phone type` SET `$column` = 'Yes' WHERE `ID` = '$id'";
+                            getdb()->query($setPrimaryEmail);
+                        }
+                    }
+            }
+        }
+    }
+        
 }
 
 ?>

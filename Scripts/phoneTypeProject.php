@@ -15,7 +15,17 @@ businessToEmail();
 
 emailBusinessComments();
 
+wrongPrimaryPhone();
+
+firstPrimaryPhone();
+
 setPrimaryPhone();
+
+wrongPrimaryEmail();
+
+firstPrimaryEmail();
+
+setPrimaryEmail();
 
 
 ?>
