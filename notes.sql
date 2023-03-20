@@ -99,4 +99,6 @@ SELECT GREATEST(`Last Update`, `Last Update_1`, `Last Update_2`) FROM `phone typ
 
 SELECT `ID`, @highest_val:= GREATEST(`Last Update`, `Last Update_1`, `Last Update_2`, `Last Update_3`, `Last Update_4`, `Last Update_5`, `Last Update_6`, `Last Update_7`, `Last Update_8`, `Last Update_9`) AS last_update, CASE @highest_val WHEN `Last Update` THEN 'Primary' WHEN `Last Update_1` THEN 'Primary_1' WHEN `Last Update_2` THEN 'Primary_2' WHEN `Last Update_3` THEN 'Primary_3' WHEN `Last Update_4` THEN 'Primary_4' WHEN `Last Update_5` THEN 'Primary_5' WHEN `Last Update_6` THEN 'Primary_6' WHEN `Last Update_7` THEN 'Primary_7' WHEN `Last Update_8` THEN 'Primary_8' WHEN `Last Update_9` THEN 'Primary_9' END AS column_name FROM `phone type` where `ID`= 1135573
 
-
+INSERT INTO `export phone type` ( 
+`ID`,`Import ID`,`First Name`,`Last Name`,`Organization Name`,`Phone Import ID`,`Type`,`Phone`,`Primary`,`Inactive`,`Comments`,`Last Update` ) 
+SELECT `ID`,`Import ID`,`First Name`,`Last Name`,`Organization Name`,`Phone Import ID`,`Type`,`Phone`,`Primary`,`Inactive`,`Comments`,`Last Update` FROM `phone type` WHERE `Phone` <> ''

@@ -27,5 +27,9 @@ firstPrimaryEmail();
 
 setPrimaryEmail();
 
+fillPhoneExportTable();
+
+fillEmailExportTable();
+
 
 ?>

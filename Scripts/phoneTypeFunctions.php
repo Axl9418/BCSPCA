@@ -324,4 +324,53 @@ function setPrimaryEmail() {
         
 }
 
+//Fill export phone type table with all phones numbers
+function fillPhoneExportTable() {
+    
+    for($i=0; $i<10; $i++) {
+        $phone = 'Phone';
+        $primary = 'Primary';
+        $inactive = 'Inactive';
+        $comments = 'Comments';
+        $date = 'Last Update';
+        
+        if($i > 0){
+            $phone = "Phone_$i";
+            $primary = "Primary_$i";
+            $inactive = "Inactive_$i";
+            $comments = "Comments_$i";
+            $date = "Last Update_$i";
+        }
+
+        $data = "INSERT INTO `export phone type` ( 
+            `ID`,`Import ID`,`First Name`,`Last Name`,`Organization Name`,`Phone Import ID`,`Type`,`Phone`,`Primary`,`Inactive`,`Comments`,`Last Update` ) SELECT `ID`,`Import ID`,`First Name`,`Last Name`,`Organization Name`,`Phone Import ID`,`Type`,`$phone`,`$primary`,`$inactive`,`$comments`,`$date` FROM `phone type` WHERE `$phone` <> ''";
+        getdb()->query($data);
+    }
+}
+
+//Fill export phone type table with all email addresses
+function fillEmailExportTable() {
+    $j = 10;
+    for($i=0; $i<10; $i++) {
+        $email = 'Email';
+        $primary = 'Is Primary?';
+        $inactive = 'Is Inactive?';
+        $comments = "Comments_$j";
+        $date = 'Date Last Changed';
+        
+        if($i > 0){
+            $j++;
+            $email = "Email_$i";
+            $primary = "Is Primary?_$i";
+            $inactive = "Is Inactive?_$i";
+            $comments = "Comments_$j";
+            $date = "Date Last Changed_$i";
+        }
+
+        $data = "INSERT INTO `export phone type` ( 
+            `ID`,`Import ID`,`First Name`,`Last Name`,`Organization Name`,`Phone Import ID`,`Type`,`Phone`,`Primary`,`Inactive`,`Comments`,`Last Update` ) SELECT `ID`,`Import ID`,`First Name`,`Last Name`,`Organization Name`,`Email Import ID`,`Email Type`,`$email`,`$primary`,`$inactive`,`$comments`,`$date` FROM `phone type` WHERE `$email` <> ''";
+        getdb()->query($data);
+    }
+}
+
 ?>
