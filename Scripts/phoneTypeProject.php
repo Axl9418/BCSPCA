@@ -31,5 +31,15 @@ fillPhoneExportTable();
 
 fillEmailExportTable();
 
+fillPhoneFormat();
+
+formatPhone();
+
+invalidPhone();
+
+concatPhone();
+
+deleteType();
+
 
 ?>

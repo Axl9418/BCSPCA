@@ -373,4 +373,71 @@ function fillEmailExportTable() {
     }
 }
 
+//Fill PhoneFormat
+
+function fillPhoneFormat() {
+    $fillPhoneFormat = "UPDATE `export phone type` SET `PhoneFormat` = `Phone`";
+    getdb()->query($fillPhoneFormat);
+}
+
+//Formating Phone number
+function formatPhone() {
+
+//Removing all non-digits (0-9) from the phone number
+$removeNonDigits = "UPDATE `export phone type` SET `PhoneFormat` = REGEXP_REPLACE(`PhoneFormat`,'[^0-9]', '') WHERE `Type` NOT IN ('Email','Email-Invalid')";
+getdb()->query($removeNonDigits);
+
+//Removing the first digit, if it's 0 or 1
+$removefirstdigit = "UPDATE `export phone type`   
+SET `PhoneFormat`   =  CASE 
+                        WHEN SUBSTR(`PhoneFormat`, 1,1) = '0' THEN SUBSTR(`PhoneFormat`, 2,LENGTH(`PhoneFormat`) -1) 
+                        WHEN SUBSTR(`PhoneFormat`, 1,1) = '1' THEN SUBSTR(`PhoneFormat`, 2,LENGTH(`PhoneFormat`) -1) 
+                        ELSE `PhoneFormat` 
+                    END
+WHERE `Type` NOT IN ('Email','Email-Invalid')";
+getdb()->query($removefirstdigit);
+
+}
+
+//Identify invalid phone numbers
+function invalidPhone() {
+
+    $invalid = "UPDATE `export phone type`
+    SET `Type` = 'Number-Invalid', `Primary` = 'No', `Inactive` = 'Yes'
+    WHERE `Type` IN ('Phone #', 'Cellular #') AND LENGTH(`PhoneFormat`) < 10";
+    getdb()->query($invalid);
+}
+
+//Fill Concatenated column
+function concatPhone() {
+    $concatPhone = "UPDATE `export phone type` SET `Concatenated` = CONCAT(`ID`,`Type`,`PhoneFormat`)";
+    getdb()->query($concatPhone);
+}
+
+//Setting Delete type
+function deleteType() {
+
+    $delete = 'Delete';
+    //Find duplicate records
+    $duplicates = "SELECT `Concatenated` FROM `export phone type` where `Concatenated` <> '' GROUP BY `Concatenated` HAVING COUNT(*) > 1 ORDER by `ID` ASC";
+    $data = getdb()->query($duplicates);
+                    if ($data->num_rows > 0) {
+                        while($row = mysqli_fetch_assoc($data)){
+                            $concatenated = $row['Concatenated'];
+
+                            $deleteType = "UPDATE `export phone type`   
+                            SET `Type`   =  CASE 
+                                                WHEN (SELECT COUNT(`Concatenated`) >= 2 FROM `export phone type` WHERE `Concatenated` = '$concatenated') AND `Concatenated` LIKE '%@%' THEN 'Delete-Email'   
+                                                WHEN (SELECT COUNT(`Concatenated`) >= 2 FROM `export phone type` WHERE `Concatenated` = '$concatenated') THEN 'Delete'                                                 
+                                                ELSE `Type` 
+                                            END
+                            WHERE `Concatenated` = '$concatenated'
+                            AND `Last Update` <> (SELECT MAX(`Last Update`) FROM `export phone type` WHERE `Concatenated` = '$concatenated')";
+                            //echo "<BR>$deleteType";
+                            getdb()->query($deleteType);
+                        } 
+                    }
+}
+
 ?>
+

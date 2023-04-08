@@ -102,3 +102,24 @@ SELECT `ID`, @highest_val:= GREATEST(`Last Update`, `Last Update_1`, `Last Updat
 INSERT INTO `export phone type` ( 
 `ID`,`Import ID`,`First Name`,`Last Name`,`Organization Name`,`Phone Import ID`,`Type`,`Phone`,`Primary`,`Inactive`,`Comments`,`Last Update` ) 
 SELECT `ID`,`Import ID`,`First Name`,`Last Name`,`Organization Name`,`Phone Import ID`,`Type`,`Phone`,`Primary`,`Inactive`,`Comments`,`Last Update` FROM `phone type` WHERE `Phone` <> ''
+
+
+//UPDATE `export phone type` SET `PhoneFormat` = `Phone`
+
+-- Step 1 - This query will remove all non-digits (0-9) from the phone number
+UPDATE `export phone type` SET `PhoneFormat` = REGEXP_REPLACE(`PhoneFormat`,'[^0-9]', '') WHERE `Type` NOT IN ('Email','Email-Invalid')
+
+-- Step 2 - Now we remove the first digit, if it's 1 (for the country code for USA/Canada)
+UPDATE `export phone type`   
+SET `PhoneFormat`   =  CASE 
+                        WHEN SUBSTR(`PhoneFormat`, 1,1) = '1' THEN SUBSTR(`PhoneFormat`, 2,LENGTH(`PhoneFormat`) -1) 
+                        ELSE `PhoneFormat` 
+                    END
+WHERE `Type` NOT IN ('Email','Email-Invalid')
+
+
+
+SELECT * FROM `export phone type` WHERE `ID` = 1000021 AND `PhoneFormat` = 6045496911
+
+SELECT CONCAT(`ID`,`Type`,`PhoneFormat`) FROM `export phone type`
+UPDATE `export phone type` SET `Concatenated` = CONCAT(`ID`,`Type`,`PhoneFormat`)
