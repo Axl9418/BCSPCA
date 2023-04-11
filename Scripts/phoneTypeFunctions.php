@@ -435,8 +435,28 @@ function deleteType() {
                             AND `Last Update` <> (SELECT MAX(`Last Update`) FROM `export phone type` WHERE `Concatenated` = '$concatenated')";
                             //echo "<BR>$deleteType";
                             getdb()->query($deleteType);
+
+                            //Edit comments
+                            editComments($concatenated);
                         } 
                     }
+}
+
+//Updating comments 
+function editComments($concatenated) {
+    if($concatenated <> '') {
+        $editComments = "UPDATE `export phone type`   
+                            SET `Comments`   =  CASE  
+                                                WHEN (SELECT COUNT(`Concatenated`) >= 2 FROM `export phone type` WHERE `Concatenated` = '$concatenated') AND `Last Update` = (SELECT MAX(`Last Update`) FROM `export phone type` WHERE `Concatenated` = '$concatenated') THEN (SELECT GROUP_CONCAT(DISTINCT CONCAT(`Comments`, '')) AS `combined` FROM `export phone type` WHERE `Concatenated` = '$concatenated')                              
+                                                ELSE `Comments` 
+                                            END
+                            WHERE `Concatenated` = '$concatenated'
+                            AND `Last Update` = (SELECT MAX(`Last Update`) FROM `export phone type` WHERE `Concatenated` = '$concatenated')";
+                            //echo "<BR>$editComments";
+                            getdb()->query($editComments);
+
+    }
+
 }
 
 ?>

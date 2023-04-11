@@ -41,5 +41,9 @@ concatPhone();
 
 deleteType();
 
+//setPrimaryPhone();
+
+//setPrimaryEmail();
+
 
 ?>
